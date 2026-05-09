@@ -1,17 +1,46 @@
+using System.Collections.Generic;
+
 namespace backend;
+
+class User
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+
+    public User(int id, string name)
+    {
+        Id = id;
+        Name = name;
+    }
+}
 
 public class Program
 {
     public static void Main(string[] args)
     {
-        Account calc = new Account("John Doe", 1000m);
+        var builder = WebApplication.CreateBuilder(args);
 
-        Console.WriteLine($"Account Name: {calc.Name}, Balance: {calc.Balance}");
+        var app = builder.Build();
 
-        calc.AddTransaction(new Transaction(200m, DateTime.Now, "Salary"));
-        calc.AddTransaction(new Transaction(-50m, DateTime.Now, "Groceries"));
+        app.MapGet("/helloWorld", () => "Hello World!").WithName("GetHelloWorld");
 
-        calc.ConsultBalance();
-        calc.ConsultTransactions();
+        var users = new List<User>
+        {
+            new User(1, "Alice"),
+            new User(2, "Bob"),
+            new User(3, "Charlie")
+        };
+
+        app.MapGet(
+            "/users",
+            () => users
+        ).WithName("GetUsers");
+
+        app.MapGet(
+            "/users/{id}",
+            (int id) => users.FirstOrDefault(u => u.Id == id) is User user ? Results.Ok(user) : Results.NotFound()
+        ).WithName("GetUserById");
+
+        app.Run();
     }
 }
