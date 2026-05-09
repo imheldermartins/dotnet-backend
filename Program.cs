@@ -1,43 +1,42 @@
-Console.WriteLine("Hello, World!");
+using System.Globalization;
 
-var builder = WebApplication.CreateBuilder(args);
+CultureInfo culture = new CultureInfo("pt-BR");
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+string name = "Helder";
+int age = 20;
+float height = 1.75f;
+double weight = 70.5;
+decimal balance = 400.00m;
 
-var app = builder.Build();
+bool isStudent = true;
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+Console.WriteLine($"Meu nome é {name}, tenho {age} anos, {height}m de altura e peso {weight}kg.");
+Console.WriteLine($"Meu saldo bancário é {balance.ToString("C", culture)}.");
+
+if (isStudent)
 {
-    app.MapOpenApi();
+    Console.WriteLine("Sou um estudante.");
+}
+else
+{
+    Console.WriteLine("Não sou um estudante.");
 }
 
-app.UseHttpsRedirection();
-
-var summaries = new[]
+for (int i = 0; i < 5; i++)
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    Console.WriteLine($"Contagem: {i}");
+}
 
-app.MapGet("/weatherforecast", () =>
+int contador = 0;
+while (contador < 3)
 {
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+    Console.WriteLine(contador);
+    contador++;
+}
 
-app.Run();
+int[] numbers = { 1, 2, 3, 4, 5 };
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+foreach (int n in numbers)
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    Console.WriteLine($"Número: {n}");
 }
