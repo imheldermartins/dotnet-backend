@@ -16,6 +16,8 @@ class User
 
 public class Program
 {
+    public record UserRequest(string Name);
+
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
@@ -33,12 +35,23 @@ public class Program
 
         app.MapGet(
             "/users",
-            () => users
+            // Users UserRequest to return only Name property of User
+            () => users.Select(u => new UserRequest(u.Name))
         ).WithName("GetUsers");
 
         app.MapGet(
             "/users/{id}",
-            (int id) => users.FirstOrDefault(u => u.Id == id) is User user ? Results.Ok(user) : Results.NotFound()
+            (int id) =>
+            {
+                var user = users.FirstOrDefault(u => u.Id == id);
+
+                if (user is User foundUser)
+                {
+                    return Results.Ok(new UserRequest(foundUser.Name));
+                }
+
+                return Results.NotFound();
+            }
         ).WithName("GetUserById");
 
         app.Run();
