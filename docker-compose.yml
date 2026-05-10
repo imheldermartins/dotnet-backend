@@ -1,0 +1,42 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    container_name: learning-dotnet-db
+    user: root
+    restart: always
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Password123!
+    ports:
+      - "1433:1433"
+    networks:
+      - app-network
+    volumes:
+      - mssql_data:/var/opt/mssql
+      - ./setup.sql:/usr/config/setup.sql
+      - ./db-init.sh:/usr/config/db-init.sh
+    entrypoint: /bin/bash /usr/config/db-init.sh
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: learning-dotnet-api
+    restart: always
+    depends_on:
+      - db
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - DB_HOST=db
+      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=DbTeste;User Id=dbuser_testedb;Password=passDbtestesupreme!;TrustServerCertificate=True;
+    ports:
+      - "5171:8080"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mssql_data:
