@@ -53,7 +53,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, User user)
+    public async Task<ActionResult<User>> Update(int id, User user)
     {
         if (id != user.Id) return BadRequest();
 
@@ -69,7 +69,7 @@ public class UsersController : ControllerBase
             throw;
         }
 
-        return NoContent();
+        return Ok(user);
     }
 
     [HttpDelete("{id}")]
