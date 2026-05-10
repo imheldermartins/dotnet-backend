@@ -3,4 +3,6 @@ obj/
 *.log
 *.tmp
 
+Migrations/
+
 GEMINI.md
