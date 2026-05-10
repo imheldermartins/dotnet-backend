@@ -13,6 +13,7 @@ public class User
     [EmailAddress(ErrorMessage = "Email inválido.")]
     [StringLength(255, ErrorMessage = "Email deve ter no máximo 255 caracteres.")]
     public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 

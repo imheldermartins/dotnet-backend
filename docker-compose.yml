@@ -18,6 +18,7 @@ services:
     entrypoint: /bin/bash /usr/config/db-init.sh
 
   backend:
+    image: learning-dotnet-api:latest
     build:
       context: .
       dockerfile: Dockerfile
