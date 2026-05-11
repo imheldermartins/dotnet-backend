@@ -1,6 +1,7 @@
 using backend.Data;
 using backend.Entities;
-using backend.Dtos;
+using backend.Dtos.UserDto;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+
+using BCrypt.Net;
 
 namespace backend.Controllers;
 
@@ -25,19 +28,35 @@ public class UsersController : ControllerBase
 
     [HttpGet("{id}")]
     [Authorize]
-    public async Task<ActionResult<User>> Show(int id)
+    public async Task<ActionResult<UserResponse>> Show(int id)
     {
-        var user = await db.Users.FindAsync(id);
-        if (user == null)
+        var loggedInUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (loggedInUserId != id.ToString())
         {
-            return NotFound();
+            return Forbid();
         }
-        return user;
+
+        var user = await db.Users
+            .Where(u => u.Id == id)
+            .Select(u => new UserResponse(u.Id, u.Name, u.Email, u.CreatedAt, u.UpdatedAt))
+            .FirstOrDefaultAsync();
+
+        if (user == null) return NotFound();
+
+        return Ok(user);
     }
 
     [HttpPost]
-    public async Task<ActionResult<User>> Store(User user)
+    public async Task<ActionResult<User>> Store(UserRequest request)
     {
+        var user = new User
+        {
+            Name = request.Name,
+            Email = request.Email,
+            Password = BCrypt.Net.BCrypt.HashPassword(request.Password)
+        };
+
         bool emailExists = await db.Users.AnyAsync(u => u.Email == user.Email);
 
         if (emailExists)
@@ -50,16 +69,21 @@ public class UsersController : ControllerBase
         db.Users.Add(user);
         await db.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(Show), new { id = user.Id }, user);
+        return CreatedAtAction(
+            nameof(Show),
+            new { id = user.Id },
+            new UserResponse(user.Id, user.Name, user.Email, user.CreatedAt, user.UpdatedAt));
     }
 
     [HttpPut("{id}")]
     [Authorize]
-    public async Task<ActionResult<User>> Update(int id, User user)
+    public async Task<ActionResult<UserResponse>> Update(int id, UserUpdateRequest request)
     {
-        if (id != user.Id) return BadRequest();
+        var userInDb = await db.Users.FindAsync(id);
 
-        db.Entry(user).State = EntityState.Modified;
+        if (userInDb == null) return NotFound();
+
+        db.Entry(userInDb).CurrentValues.SetValues(request);
 
         try
         {
@@ -71,7 +95,15 @@ public class UsersController : ControllerBase
             throw;
         }
 
-        return Ok(user);
+        var response = new UserResponse(
+            userInDb.Id,
+            userInDb.Name,
+            userInDb.Email,
+            userInDb.CreatedAt,
+            userInDb.UpdatedAt
+        );
+
+        return Ok(response);
     }
 
     [HttpDelete("{id}")]

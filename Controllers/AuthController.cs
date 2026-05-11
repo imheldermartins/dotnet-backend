@@ -10,6 +10,8 @@ using System.Security.Claims;
 using System.Text;
 using System.Security.Cryptography;
 
+using BCrypt.Net;
+
 namespace backend.Controllers;
 
 [Route("api/[controller]")]
@@ -28,9 +30,11 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<User>> Login(AuthRequest request, [FromServices] IConfiguration config)
     {
-        var user = await db.Users.FirstOrDefaultAsync(u => u.Email == request.Email && u.Password == request.Password);
+        var user = await db.Users.FirstOrDefaultAsync(u =>
+            u.Email == request.Email
+        );
 
-        if (user == null)
+        if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
         {
             ModelState.AddModelError("Authentication", "Credenciais inválidas.");
             return Unauthorized(ModelState);
