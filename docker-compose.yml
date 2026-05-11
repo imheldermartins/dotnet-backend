@@ -30,6 +30,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - DB_HOST=db
       - ConnectionStrings__DefaultConnection=Server=db,1433;Database=DbTeste;User Id=dbuser_testedb;Password=passDbtestesupreme!;TrustServerCertificate=True;
+      - Jwt__Issuer=BackendApi
+      - Jwt__Audience=AngularApp
+      - Jwt__Key=${JWT_KEY:-}
     ports:
       - "5171:8080"
     networks:

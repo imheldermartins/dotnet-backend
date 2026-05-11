@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e
 
+# Se a chave JWT não for fornecida, gera uma aleatória para evitar erro de startup
+if [ -z "$Jwt__Key" ]; then
+  echo "AVISO: Jwt__Key não definida. Gerando uma chave temporária com openssl..."
+  export Jwt__Key=$(openssl rand -base64 32)
+fi
+
 # Aguarda o SQL Server ficar disponível
 echo "Aguardando o SQL Server em $DB_HOST:1433..."
 until nc -z $DB_HOST 1433; do

@@ -21,7 +21,7 @@ RUN dotnet tool install --global dotnet-ef
 ENV PATH="$PATH:/root/.dotnet/tools"
 
 # 2. Instalar ferramentas necessárias para o entrypoint (wait-for-it pattern)
-RUN apt-get update && apt-get install -y curl netcat-traditional && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y curl netcat-traditional openssl && rm -rf /var/lib/apt/lists/*
 
 # 3. Copiar os arquivos publicados do estágio de build
 COPY --from=build /app/publish .
