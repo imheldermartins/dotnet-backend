@@ -17,8 +17,13 @@ done
 echo "SQL Server está online! Verificando migrações..."
 
 # Executa migrações
+if [ ! -d "Migrations" ]; then
+  echo "Pasta Migrations não encontrada. Criando migração inicial 'InitialSchema'..."
+  dotnet ef migrations add InitialSchema
+fi
+
 echo "Aplicando migrações ao banco de dados..."
-dotnet ef database update --no-build
+dotnet ef database update
 
 echo "Iniciando a aplicação..."
 dotnet backend.dll

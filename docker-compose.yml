@@ -29,7 +29,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - DB_HOST=db
-      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=DbTeste;User Id=dbuser_testedb;Password=passDbtestesupreme!;TrustServerCertificate=True;
+      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=Vertrau;User Id=dbuser_vertrau;Password=superdev123!;TrustServerCertificate=True;
       - Jwt__Issuer=BackendApi
       - Jwt__Audience=AngularApp
       - Jwt__Key=${JWT_KEY:-}
