@@ -19,7 +19,7 @@ public class Program
             options.AddPolicy("AllowFrontend",
                 policy =>
                 {
-                    policy.WithOrigins("http://localhost:4200") // Replace with your frontend URL
+                    policy.WithOrigins("http://localhost") // Replace with your frontend URL
                         .AllowAnyHeader()
                         .AllowAnyMethod();
                 });
