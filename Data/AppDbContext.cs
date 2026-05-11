@@ -1,7 +1,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 
-namespace backend.Data;
+namespace Vertrau.Data;
 
 public class AppDbContext : DbContext
 {

@@ -1,6 +1,6 @@
 using System;
 
-namespace backend.Entities;
+namespace Vertrau.Entities;
 
 public class Post
 {

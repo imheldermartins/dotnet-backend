@@ -1,6 +1,6 @@
-using backend.Data;
-using backend.Entities;
-using backend.Dtos.UserDto;
+using Vertrau.Data;
+using Vertrau.Entities;
+using Vertrau.Dtos.UserDto;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -13,9 +13,9 @@ using System.Text;
 
 using BCrypt.Net;
 
-namespace backend.Controllers;
+namespace Vertrau.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
 [ApiController]
 public class UsersController : ControllerBase
 {
@@ -24,6 +24,35 @@ public class UsersController : ControllerBase
     public UsersController(AppDbContext db)
     {
         this.db = db;
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<UserResponse>>> Index(
+        [FromQuery] string? firstName,
+        [FromQuery] string? lastName,
+        [FromQuery] string? email,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        var query = db.Users.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(firstName))
+            query = query.Where(u => u.FirstName.Contains(firstName));
+
+        if (!string.IsNullOrWhiteSpace(lastName))
+            query = query.Where(u => u.LastName.Contains(lastName));
+
+        if (!string.IsNullOrWhiteSpace(email))
+            query = query.Where(u => u.Email.Contains(email));
+
+        // Paginação
+        var users = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(u => new UserResponse(u.Id, u.FirstName, u.LastName, u.Email, u.Gender, u.BirthDate, u.CreatedAt, u.UpdatedAt))
+            .ToListAsync();
+
+        return Ok(users);
     }
 
     [HttpGet("{id}")]
@@ -39,7 +68,7 @@ public class UsersController : ControllerBase
 
         var user = await db.Users
             .Where(u => u.Id == id)
-            .Select(u => new UserResponse(u.Id, u.Name, u.Email, u.CreatedAt, u.UpdatedAt))
+            .Select(u => new UserResponse(u.Id, u.FirstName, u.LastName, u.Email, u.Gender, u.BirthDate, u.CreatedAt, u.UpdatedAt))
             .FirstOrDefaultAsync();
 
         if (user == null) return NotFound();
@@ -52,9 +81,12 @@ public class UsersController : ControllerBase
     {
         var user = new User
         {
-            Name = request.Name,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
             Email = request.Email,
-            Password = BCrypt.Net.BCrypt.HashPassword(request.Password)
+            Gender = request.Gender!.Value,
+            Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
+            BirthDate = request.BirthDate
         };
 
         bool emailExists = await db.Users.AnyAsync(u => u.Email == user.Email);
@@ -72,7 +104,7 @@ public class UsersController : ControllerBase
         return CreatedAtAction(
             nameof(Show),
             new { id = user.Id },
-            new UserResponse(user.Id, user.Name, user.Email, user.CreatedAt, user.UpdatedAt));
+            new UserResponse(user.Id, user.FirstName, user.LastName, user.Email, user.Gender, user.BirthDate, user.CreatedAt, user.UpdatedAt));
     }
 
     [HttpPut("{id}")]
@@ -97,8 +129,11 @@ public class UsersController : ControllerBase
 
         var response = new UserResponse(
             userInDb.Id,
-            userInDb.Name,
+            userInDb.FirstName,
+            userInDb.LastName,
             userInDb.Email,
+            userInDb.Gender,
+            userInDb.BirthDate,
             userInDb.CreatedAt,
             userInDb.UpdatedAt
         );

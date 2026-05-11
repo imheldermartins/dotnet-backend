@@ -1,7 +1,7 @@
 using System;
-using backend.Dtos.UserDto;
+using Vertrau.Dtos.UserDto;
 
-namespace backend.Dtos.PostDto;
+namespace Vertrau.Dtos.PostDto;
 
 public record PostResponse(
     int Id,

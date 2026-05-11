@@ -1,17 +1,17 @@
-using backend.Data;
-using backend.Entities;
+using Vertrau.Data;
+using Vertrau.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
-using backend.Dtos.PostDto;
-using backend.Dtos.UserDto;
+using Vertrau.Dtos.PostDto;
+using Vertrau.Dtos.UserDto;
 
-namespace backend.Controllers;
+namespace Vertrau.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
 [ApiController]
 [Authorize]
 public class PostsController : ControllerBase
@@ -37,7 +37,7 @@ public class PostsController : ControllerBase
                 p.Content,
                 p.CreatedAt,
                 p.UpdatedAt,
-                new UserJoinedResponse(p.User.Id, p.User.Name, p.User.Email)
+                new UserJoinedResponse(p.User.Id, $"{p.User.FirstName} {p.User.LastName}", p.User.Email)
             ))
             .ToListAsync();
 
@@ -57,7 +57,7 @@ public class PostsController : ControllerBase
                 p.Content,
                 p.CreatedAt,
                 p.UpdatedAt,
-                new UserJoinedResponse(p.User.Id, p.User.Name, p.User.Email)
+                new UserJoinedResponse(p.User.Id, $"{p.User.FirstName} {p.User.LastName}", p.User.Email)
             ))
             .FirstOrDefaultAsync();
 
@@ -89,7 +89,7 @@ public class PostsController : ControllerBase
             newPost.Content,
             newPost.CreatedAt,
             newPost.UpdatedAt,
-            new UserJoinedResponse(user!.Id, user!.Name, user!.Email)
+            new UserJoinedResponse(user!.Id, $"{user!.FirstName} {user!.LastName}", user!.Email)
         );
 
         return CreatedAtAction(nameof(Show), new { id = newPost.Id }, response);
@@ -113,7 +113,7 @@ public class PostsController : ControllerBase
             postInDb.Content,
             postInDb.CreatedAt,
             postInDb.UpdatedAt,
-            new UserJoinedResponse(postInDb.User.Id, postInDb.User.Name, postInDb.User.Email)
+            new UserJoinedResponse(postInDb.User.Id, $"{postInDb.User.FirstName} {postInDb.User.LastName}", postInDb.User.Email)
         );
 
         return Ok(response);

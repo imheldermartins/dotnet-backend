@@ -1,6 +1,6 @@
 using System;
 
-namespace backend.Dtos.PostDto;
+namespace Vertrau.Dtos.PostDto;
 
 public record PostRequest(
     string Title,

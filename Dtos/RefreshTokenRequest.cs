@@ -1,6 +1,6 @@
 using System;
 
-namespace backend.Dtos;
+namespace Vertrau.Dtos;
 
 public class RefreshTokenRequest
 {

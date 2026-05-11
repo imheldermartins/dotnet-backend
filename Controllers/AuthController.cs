@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using backend.Data;
-using backend.Entities;
-using backend.Dtos;
+using Vertrau.Data;
+using Vertrau.Entities;
+using Vertrau.Dtos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,9 +12,9 @@ using System.Security.Cryptography;
 
 using BCrypt.Net;
 
-namespace backend.Controllers;
+namespace Vertrau.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
 [ApiController]
 public class AuthController : ControllerBase
 {
@@ -66,11 +66,9 @@ public class AuthController : ControllerBase
         )
             return Unauthorized(new { message = "Sessão expirada. Faça login novamente." });
 
-        // Se passou, geramos um NOVO Access Token e um NOVO Refresh Token
         var newAccessToken = GenerateAccessToken(user);
         var newRefreshToken = GenerateRefreshToken();
 
-        // Atualiza no banco (Sliding Expiration: renova para +7 dias a partir de agora)
         user.RefreshToken = newRefreshToken;
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         await db.SaveChangesAsync();

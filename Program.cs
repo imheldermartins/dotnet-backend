@@ -1,4 +1,4 @@
-using backend.Data;
+using Vertrau.Data;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore;
 
@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace backend;
+namespace Vertrau;
 
 public class Program
 {
