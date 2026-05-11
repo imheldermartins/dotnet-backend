@@ -11,7 +11,7 @@ GO
 -- Cria o Login no servidor se não existir
 IF NOT EXISTS (SELECT name FROM sys.server_principals WHERE name = 'dbuser_vertrau')
 BEGIN
-    CREATE LOGIN dbuser_vertrau WITH PASSWORD = 'superdev123!', CHECK_POLICY = OFF;
+    CREATE LOGIN dbuser_vertrau WITH PASSWORD = '$(DB_PASSWORD)', CHECK_POLICY = OFF;
 END
 GO
 

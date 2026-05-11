@@ -10,7 +10,7 @@ for i in {1..60}; do
     /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -Q "SELECT 1" > /dev/null 2>&1
     if [ $? -eq 0 ]; then
         echo "SQL Server pronto! Executando setup.sql..."
-        /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -i /usr/config/setup.sql
+        /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -v DB_PASSWORD="$DB_PASSWORD" -C -i /usr/config/setup.sql
         break
     fi
     echo "Ainda não está pronto... ($i/60)"

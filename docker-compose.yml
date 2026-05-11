@@ -6,7 +6,8 @@ services:
     restart: always
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=Password123!
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD:-Password123!}
+      - DB_PASSWORD=${DB_PASSWORD:-superdev123!}
     ports:
       - "1433:1433"
     networks:
@@ -29,7 +30,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - DB_HOST=db
-      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=Vertrau;User Id=dbuser_vertrau;Password=superdev123!;TrustServerCertificate=True;
+      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=Vertrau;User Id=dbuser_vertrau;Password=${DB_PASSWORD:-superdev123!};TrustServerCertificate=True;
       - Jwt__Issuer=BackendApi
       - Jwt__Audience=AngularApp
       - Jwt__Key=${JWT_KEY:-}
