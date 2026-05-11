@@ -2,7 +2,7 @@ using System;
 
 namespace backend.Dtos.PostDto;
 
-public class PostRequest
-{
-
-}
+public record PostRequest(
+    string Title,
+    string Content
+);

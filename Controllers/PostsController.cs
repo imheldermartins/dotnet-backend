@@ -6,6 +6,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
+using backend.Dtos.PostDto;
+using backend.Dtos.UserDto;
+
 namespace backend.Controllers;
 
 [Route("api/[controller]")]
@@ -21,65 +24,111 @@ public class PostsController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<Post>>> Index()
     {
-        return await db.Posts.Include(p => p.User).ToListAsync();
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        var posts = await db.Posts
+            .Where(p => p.UserId == userId)
+            .Select(p => new PostResponse(
+                p.Id,
+                p.Title,
+                p.Content,
+                p.CreatedAt,
+                p.UpdatedAt,
+                new UserJoinedResponse(p.User.Id, p.User.Name, p.User.Email)
+            ))
+            .ToListAsync();
+
+        return Ok(posts);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Post>> Show(int id)
+    [Authorize]
+    public async Task<ActionResult<PostResponse>> Show(int id)
     {
-        var post = await db.Posts.Include(p => p.User).FirstOrDefaultAsync(p => p.Id == id);
-        if (post == null)
-        {
-            return NotFound();
-        }
-        return post;
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var post = await db.Posts
+            .Where(p => p.Id == id && p.UserId == userId)
+            .Select(p => new PostResponse(
+                p.Id,
+                p.Title,
+                p.Content,
+                p.CreatedAt,
+                p.UpdatedAt,
+                new UserJoinedResponse(p.User.Id, p.User.Name, p.User.Email)
+            ))
+            .FirstOrDefaultAsync();
+
+        if (post == null) return NotFound();
+
+        return Ok(post);
     }
 
     [HttpPost]
-    public async Task<ActionResult<Post>> Store(Post post)
+    [Authorize]
+    public async Task<ActionResult<PostResponse>> Store(PostRequest request)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (userId == null) return Unauthorized();
-
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var newPost = new Post
         {
-            Title = post.Title,
-            Content = post.Content,
-            UserId = int.Parse(userId)
+            Title = request.Title,
+            Content = request.Content,
+            UserId = userId
         };
 
         db.Posts.Add(newPost);
         await db.SaveChangesAsync();
 
-        return Ok(newPost);
+        var user = await db.Users.FindAsync(userId);
+
+        var response = new PostResponse(
+            newPost.Id,
+            newPost.Title,
+            newPost.Content,
+            newPost.CreatedAt,
+            newPost.UpdatedAt,
+            new UserJoinedResponse(user!.Id, user!.Name, user!.Email)
+        );
+
+        return CreatedAtAction(nameof(Show), new { id = newPost.Id }, response);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<Post>> Update(int id, Post post)
+    [Authorize]
+    public async Task<ActionResult<PostResponse>> Update(int id, PostRequest request)
     {
-        if (id != post.Id) return BadRequest();
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var postInDb = await db.Posts.FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
 
-        var existingPost = await db.Posts.FindAsync(id);
-        if (existingPost == null) return NotFound();
+        if (postInDb == null) return NotFound();
 
-        existingPost.Title = post.Title;
-        existingPost.Content = post.Content;
-
+        db.Entry(postInDb).CurrentValues.SetValues(request);
         await db.SaveChangesAsync();
 
-        return Ok(existingPost);
+        var response = new PostResponse(
+            postInDb.Id,
+            postInDb.Title,
+            postInDb.Content,
+            postInDb.CreatedAt,
+            postInDb.UpdatedAt,
+            new UserJoinedResponse(postInDb.User.Id, postInDb.User.Name, postInDb.User.Email)
+        );
+
+        return Ok(response);
     }
 
     [HttpDelete("{id}")]
+    [Authorize]
     public async Task<IActionResult> Destroy(int id)
     {
-        var post = await db.Posts.FindAsync(id);
-        if (post == null) return NotFound();
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var postInDb = await db.Posts.FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
 
-        db.Posts.Remove(post);
+        if (postInDb == null) return NotFound();
+
+        db.Posts.Remove(postInDb);
         await db.SaveChangesAsync();
 
         return NoContent();
