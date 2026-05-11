@@ -14,6 +14,17 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowFrontend",
+                policy =>
+                {
+                    policy.WithOrigins("http://localhost:4200") // Replace with your frontend URL
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+        });
+
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
         );
@@ -51,6 +62,10 @@ public class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
+
+        app.UseCors("AllowFrontend");
+
+        app.UseRouting();
 
         app.UseAuthentication();
         app.UseAuthorization();
